@@ -1,266 +1,294 @@
-# TruthScope: Fake News Detection Chrome Extension
+# SatyanwesAI: Fake News Detection Chrome Extension
 
-A Chrome extension that helps users identify potential fake news and misinformation by analyzing both textual content and media elements using machine learning and fact-checking APIs.
+A comprehensive Chrome extension that helps users identify fake news, misinformation, and manipulated media by performing real-time analysis of web content using machine learning, fact-checking APIs, and media forensics.
 
 ## Features
 
-- 🔍 Real-time article and media analysis
-- 🤖 BERT-based fake news detection
-- 📷 Media manipulation detection
+- 🔍 Real-time article content and media analysis
+- 🤖 Machine learning-based fake news detection
+- 📊 Sentiment and political bias analysis
+- 📷 AI-generated image detection
 - 📚 Integration with fact-checking services
-- 🔔 Detailed analysis view in side panel
-- 🎨 Modern, user-friendly interface with theme support
-- 🎯 Automatic highlighting of potentially misleading text segments
-- 📊 Confidence scoring for analysis results
+- 🎭 Detailed credibility assessment
+- 🔔 In-depth analysis view in side panel
+- 🎨 Modern interface with customizable theme support
+- 🎯 Automatic highlighting of misleading text segments
+- 👁️ Visual indicators for content credibility
 
 ## Technical Architecture
 
-TruthScope follows a modular architecture with four main components that work together:
+SatyanwesAI follows a modular architecture with four main frontend components that interact with multiple backend microservices:
 
 ### 1. Content Script (content.js)
 
-Extracts article content and media from web pages and communicates with the background script.
+Extracts content from web pages and communicates with the background script.
 
 **Key Responsibilities:**
 - Extracts text from article-like web pages
-- Identifies images and video content for analysis
-- Sends content to the background script for processing
+- Identifies and monitors images and video content
+- Sends content to the background script for analysis
 - Highlights potentially misleading content on the page
+- Adds analysis overlays to media elements
+- Handles DOM manipulation for visual feedback
 
 **Code Snippet:**
 ```javascript
-// Function to extract article content and media, then send for analysis
-async function init() {
+// Function to extract article content
+function extractArticleContent() {
   try {
-    if (!isArticlePage()) {
-        console.log("Not an article page, skipping analysis.");
-        return;
+    const selectors = [
+      'article',
+      '[role="article"]',
+      '.article-content',
+      '.post-content',
+      'main',
+      '.main-content'
+    ];
+
+    let articleElement = null;
+    for (const selector of selectors) {
+      const element = document.querySelector(selector);
+      if (element) {
+        articleElement = element;
+        break;
+      }
     }
 
-    const processPage = async () => {
-        const content = extractArticleContent();
-        const mediaSources = extractMediaSources();
-        const url = window.location.href;
-
-        // Send text and media data in parallel
-        await Promise.all([
-            sendTextData(url, content),
-            sendMediaData(url, mediaSources)
-        ]);
-    };
-
-    if (document.readyState === 'complete') {
-      await processPage();
-    } else {
-      window.addEventListener('load', processPage);
+    // If no article element found, use body content
+    if (!articleElement) {
+      articleElement = document.body;
     }
+
+    // Extract text content
+    const content = articleElement.innerText
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    return content;
   } catch (error) {
-    console.error('Error in initialization:', error);
+    console.error('Error extracting content:', error);
+    return '';
   }
-}
-
-// Function to apply highlights to misleading content
-function applyHighlights(highlights) {
-  if (!highlights || highlights.length === 0) return;
-  
-  console.log("Applying highlights:", highlights);
-  const highlightStyle = 'background-color: yellow; color: black;';
-  
-  // DOM traversal to find and highlight text segments
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-  // ...highlight implementation...
 }
 ```
 
 ### 2. Background Script (background.js)
 
-Acts as the central hub for the extension, processing content and coordinating communication.
+Acts as the central hub for the extension, coordinating communication between components and backend services.
 
 **Key Responsibilities:**
-- Receives content and media from the content script
-- Sends data to separate backend endpoints for analysis
+- Receives content from the content script
+- Sends data to separate backend endpoints for analysis:
+  - Text content to the text analysis service
+  - Media URLs to the media analysis service
+  - Text content to the sentiment/bias analysis service
 - Stores analysis results per tab
 - Distributes results to UI components and content script
-- Provides highlighting instructions back to content script
+- Manages user authentication and token handling
+- Coordinates theme preferences across components
 
 **Code Snippet:**
 ```javascript
-// Handle messages from popup and content script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const tabId = sender.tab?.id;
+// Define backend endpoints
+const TEXT_ANALYSIS_URL = "http://127.0.0.1:5000/analyze";
+const IMAGE_ANALYSIS_URL = "http://127.0.0.1:3000/analyze_image";
+const VIDEO_ANALYSIS_URL = "http://127.0.0.1:3000/analyze_video";
+const AUDIO_ANALYSIS_URL = "http://127.0.0.1:3000/analyze_audio";
+const SENTIMENT_BIAS_ANALYSIS_URL = "http://127.0.0.1:5002/analyze_sentiment_bias";
+const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json';
 
-  // Process text content from content script
-  if (message.action === "processText" && tabId) {
-    console.log(`📝 [Tab ${tabId}] Received text for analysis:`, message.data.url);
-    const { url, articleText } = message.data;
-    
-    // Send to backend for analysis
-    fetch(TEXT_ANALYSIS_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: url, text: articleText.slice(0, 2000) })
-    })
-      .then(response => response.json())
-      .then(result => {
-        // Store result for this tab
-        if (!processingState[tabId]) processingState[tabId] = {};
-        processingState[tabId].textResult = result;
-
-        // Send highlights back to content script if available
-        if (result.highlights && result.highlights.length > 0) {
-            chrome.tabs.sendMessage(tabId, {
-                action: "applyHighlights",
-                highlights: result.highlights
-            });
-        }
-        
-        // ...additional result handling...
-      });
-    return true; // Indicate async response
-  }
-  
-  // Handle requests for results from popup or sidepanel
-  if (message.action === "getResultForTab") {
-      const targetTabId = message.tabId;
-      if (processingState[targetTabId]) {
-          sendResponse({ status: "found", data: processingState[targetTabId] });
-      } else {
-          sendResponse({ status: "not_found" });
-      }
-      return false; // Synchronous response
-  }
-  
-  // ...other message handlers...
-});
+// Keep track of active connections and processing state per tab
+let activeConnections = new Set();
+let processingState = {}; // { tabId: { textResult: ..., mediaResult: ..., mediaItems: { url: result, ... }, sentimentBiasResult: ... } }
 ```
 
 ### 3. Popup UI (popup.js)
 
-Provides a quick overview of the analysis results in a compact popup interface.
+Provides a quick summary of analysis results in a compact popup interface.
 
 **Key Responsibilities:**
 - Fetches analysis results for the current tab
-- Displays a summary of the credibility assessment
-- Provides a button to open the more detailed side panel
-- Synchronizes theme preferences across components
+- Displays a credibility assessment summary
+- Shows sentiment and bias information
+- Manages user authentication status
+- Provides a button to open the detailed side panel
+- Supports theme customization and synchronization
 
 **Code Snippet:**
 ```javascript
-// Get the current tab and request results from background script
-chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-    const currentTab = tabs[0];
-    if (currentTab && currentTab.id) {
-        statusDiv.textContent = 'Loading analysis results...';
-        statusIndicator.className = 'status-indicator unknown pulse-animation';
-        
-        // Request results from background script
-        chrome.runtime.sendMessage(
-            { action: "getResultForTab", tabId: currentTab.id },
-            (response) => {
-                if (response && response.status === "found") {
-                    console.log("Received data for popup:", response.data);
-                    updateUI(response.data);
-                } else if (response && response.status === "not_found") {
-                    statusDiv.textContent = 'Analysis not yet complete or page not supported.';
-                    statusIndicator.className = 'status-indicator unknown pulse-animation';
-                } else {
-                    statusDiv.textContent = 'Could not retrieve analysis results.';
-                    statusIndicator.className = 'status-indicator unknown';
-                }
-            }
-        );
-    }
-});
-
-// Update UI based on analysis results
+// Function to update UI based on analysis result
 function updateUI(data) {
+    if (!data || (!data.textResult && !data.sentimentBiasResult)) {
+        statusDiv.textContent = 'No analysis data available yet.';
+        statusIndicator.className = 'status-indicator unknown';
+        return;
+    }
+
+    // Display Text Analysis Result
     if (data.textResult) {
-        if (data.textResult.label !== undefined) {
+        if (data.textResult.error) {
+            statusDiv.textContent = `Error: ${data.textResult.error}`;
+            statusIndicator.className = 'status-indicator unknown';
+        } else if (data.textResult.label !== undefined) {
             const isFake = data.textResult.label === "LABEL_1";
             const confidence = (data.textResult.score * 100).toFixed(1);
             
             statusDiv.textContent = `${isFake ? 
                 'This content may be misleading' : 
-                'This content appears to be authentic'}`;
+                'This content appears to be authentic'} (${confidence}% confidence)`;
             
             // Update visual indicator based on credibility
             statusIndicator.className = `status-indicator ${isFake ? 'fake' : 'real'}`;
-            // ...update indicator content...
         }
     }
+
+    // Display Sentiment/Bias Data
+    if (data.sentimentBiasResult) {
+        sentimentBiasSection.classList.remove('hidden');
+        
+        // Sentiment display
+        const sentiment = data.sentimentBiasResult.sentiment;
+        if (sentiment && sentiment.label) {
+            let sentimentText = sentiment.label;
+            let sentimentColorClass = 'bg-gray-200 text-gray-700';
+            let sentimentIcon = '';
+            
+            // Configure display based on sentiment
+            if (sentimentText.toLowerCase() === 'positive') {
+                sentimentColorClass = 'bg-green-100 text-green-800';
+                sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" /></svg>`;
+            } else if (sentimentText.toLowerCase() === 'negative') {
+                sentimentColorClass = 'bg-red-100 text-red-800';
+                sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>`;
+            } else if (sentimentText.toLowerCase() === 'neutral') {
+                sentimentColorClass = 'bg-blue-100 text-blue-800';
+                sentimentIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>`; 
+            }
+            sentimentDisplay.innerHTML = `${sentimentIcon} ${sentimentText}`;
+            sentimentDisplay.classList.add(...sentimentColorClass.split(' '));
+        }
+        
+        // Bias tags display
+        const bias = data.sentimentBiasResult.bias;
+        if (bias && bias.indicators && bias.indicators.length > 0) {
+            biasTags.innerHTML = '';
+            bias.indicators.forEach(indicator => {
+                const tag = document.createElement('span');
+                tag.className = 'inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded mr-1 mb-1';
+                tag.textContent = `${indicator.charAt(0).toUpperCase() + indicator.slice(1)}`; 
+                biasTags.appendChild(tag);
+            });
+        }
+    }
+    
+    actionButton.textContent = 'View Details';
+    actionButton.disabled = false;
 }
 ```
 
 ### 4. Side Panel UI (sidepanel.js)
 
-Shows detailed analysis results including confidence scores, fact checks, and media analysis.
+Provides comprehensive analysis results including confidence scores, fact-checking sources, and media analysis.
 
 **Key Responsibilities:**
-- Displays comprehensive analysis results
-- Shows fact-checking sources and related information
-- Presents media analysis results
+- Displays detailed credibility assessment with confidence scores
+- Shows AI-generated reasoning about the content
+- Presents sentiment and bias analysis
+- Displays fact-checking sources and related information
+- Shows media manipulation detection results
 - Offers theme customization options
-- Allows refreshing results
+- Provides an interface for user-initiated analysis
 
 **Code Snippet:**
 ```javascript
-// Function to fetch and display results for the current tab
-function loadResultsForCurrentTab() {
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-        const currentTab = tabs[0];
-        if (currentTab && currentTab.id) {
-            statusBadge.textContent = "Loading...";
-            statusBadge.className = "status-badge loading";
-            
-            // Request detailed results from background script
-            chrome.runtime.sendMessage(
-                { action: "getResultForTab", tabId: currentTab.id },
-                (response) => {
-                    if (response && response.status === "found") {
-                        console.log("Received data for sidepanel:", response.data);
-                        displayResults(response.data);
-                    } else {
-                        // ...handle not found or error cases...
-                    }
-                }
-            );
-        }
-    });
-}
-
-// Display detailed analysis results
-function displayResults(data) {
-    if (data.textResult) {
-        if (data.textResult.label !== undefined) {
-            const isFake = data.textResult.label === "LABEL_1";
-            const confidence = (data.textResult.score * 100).toFixed(1);
-            
-            statusBadge.textContent = isFake ? 
-                "Potential Misinformation" : "Likely Credible";
-            statusBadge.className = `status-badge ${isFake ? 'fake' : 'real'}`;
-            confidenceDiv.textContent = `Confidence Score: ${confidence}%`;
-            
-            // Display fact-check information if available
-            if (data.textResult.fact_check && 
-                Array.isArray(data.textResult.fact_check) && 
-                data.textResult.fact_check.length > 0) {
-                const factsHtml = data.textResult.fact_check
-                    .map(createSourceItemHTML).join('');
-                factCheckResultsContainer.innerHTML = factsHtml;
+// Function to generate AI reasoning about the content
+function generateAIReasoning(data) {
+    let reasoningContent = '';
+    
+    if (!data || (!data.textResult && !data.mediaResult)) {
+        reasoningContent = '<p>Insufficient data available for AI reasoning.</p>';
+        return reasoningContent;
+    }
+    
+    // Generate reasoning based on text analysis
+    if (data.textResult && !data.textResult.error) {
+        const isFake = data.textResult.label === "LABEL_1";
+        
+        if (isFake) {
+            reasoningContent += `<p class="mb-3">This content appears to contain misinformation or misleading elements. Here's why:</p>`;
+            reasoningContent += '<ul class="list-disc ml-5 mb-3">';
+            if (data.textResult.reasoning && Array.isArray(data.textResult.reasoning)) {
+                data.textResult.reasoning.forEach(point => { reasoningContent += `<li class="mb-2">${point}</li>`; });
+            } else {
+                reasoningContent += `<li class="mb-2">The content contains claims that contradict verified information.</li>`;
+                reasoningContent += `<li class="mb-2">The narrative appears to be misleading or false.</li>`;
+                reasoningContent += `<li class="mb-2">Multiple fact-checking sources have flagged similar claims.</li>`;
             }
+            reasoningContent += '</ul>';
+            
+            if (data.textResult.highlights && data.textResult.highlights.length > 0) {
+                reasoningContent += '<p class="mb-2 font-medium">Highlighted misleading segments:</p>';
+                reasoningContent += '<ul class="list-disc ml-5 mb-3 italic text-gray-600 dark:text-gray-400">';
+                data.textResult.highlights.forEach(highlight => { reasoningContent += `<li class="mb-1">"${highlight}"</li>`; });
+                reasoningContent += '</ul>';
+            }
+        } else {
+            reasoningContent += `<p class="mb-3">This content appears to be credible based on my analysis. Here's why:</p>`;
+            reasoningContent += '<ul class="list-disc ml-5 mb-3">';
+            if (data.textResult.reasoning && Array.isArray(data.textResult.reasoning)) {
+                data.textResult.reasoning.forEach(point => { reasoningContent += `<li class="mb-2">${point}</li>`; });
+            } else {
+                reasoningContent += `<li class="mb-2">Claims align with verified information.</li>`;
+                reasoningContent += `<li class="mb-2">No contradictions found with reputable sources.</li>`;
+                reasoningContent += `<li class="mb-2">Contains verifiable details.</li>`;
+            }
+            reasoningContent += '</ul>';
         }
     }
     
-    // Display media analysis results if available
-    if (data.mediaResult) {
-        // ...render media analysis results...
+    // Add media analysis reasoning if available
+    if (data.mediaResult && (data.mediaResult.manipulated_images_found > 0 || data.mediaResult.images_analyzed > 0)) {
+        reasoningContent += '<p class="font-semibold mt-4 mb-2">Media Analysis:</p>';
+        if (data.mediaResult.manipulated_images_found > 0) {
+            reasoningContent += `<p class="mb-3">Detected potential manipulation in ${data.mediaResult.manipulated_images_found} of ${data.mediaResult.images_analyzed} images.</p>`;
+            if (data.mediaResult.manipulated_media && data.mediaResult.manipulated_media.length > 0) {
+                reasoningContent += '<ul class="list-disc ml-5 mb-3">';
+                data.mediaResult.manipulated_media.forEach(item => {
+                    const manipType = item.manipulation_type ? item.manipulation_type.replace(/_/g, ' ') : 'AI generation';
+                    const confidencePercent = (item.confidence * 100).toFixed(1);
+                    reasoningContent += `<li class="mb-2">Detected ${manipType} (${confidencePercent}% confidence).</li>`;
+                });
+                reasoningContent += '</ul>';
+            }
+        } else if (data.mediaResult.images_analyzed > 0) {
+            reasoningContent += `<p class="mb-3">Analyzed ${data.mediaResult.images_analyzed} images; no manipulation detected.</p>`;
+        }
     }
+    
+    // Add conclusion
+    if (data.textResult || data.mediaResult) {
+        reasoningContent += '<p class="font-semibold mt-4 mb-2">Conclusion:</p>';
+        if (data.textResult && data.textResult.label === "LABEL_1" && data.textResult.score > 0.7) {
+            reasoningContent += '<p class="text-red-600 dark:text-red-400">Content appears misleading. Consult additional sources.</p>';
+        } else if (data.mediaResult && data.mediaResult.manipulated_images_found > 0) {
+            reasoningContent += '<p class="text-yellow-600 dark:text-yellow-400">Media contains manipulated elements. Exercise caution.</p>';
+        } else if (data.textResult && data.textResult.label !== "LABEL_1") {
+            reasoningContent += '<p class="text-green-600 dark:text-green-400">Content appears factually accurate and reliable.</p>';
+        } else {
+            reasoningContent += '<p>Analysis inconclusive. Seek additional sources.</p>';
+        }
+    }
+    
+    if (!reasoningContent) {
+        reasoningContent = '<p>Analysis complete, but more information needed for detailed reasoning.</p>';
+    }
+    return reasoningContent;
 }
 ```
 
 ## File Interactions and Communication Architecture
 
-The TruthScope extension relies on a carefully designed communication architecture where each component has specific responsibilities and communicates with others through well-defined channels:
+The SatyanwesAI extension follows a well-structured communication architecture where each component has specific responsibilities and communicates with others through defined channels:
 
 ### Content Script (content.js) Interactions
 
@@ -268,39 +296,40 @@ The TruthScope extension relies on a carefully designed communication architectu
 - **Extracts** article content and media elements from the page DOM
 - **Communicates with background.js** by sending:
   - `processText` messages with article text for credibility analysis
-  - `processMedia` messages with image and video URLs for media manipulation detection
+  - Content is analyzed up to 3000 characters to fit API limits
 - **Receives from background.js**:
-  - `applyHighlights` messages containing text segments to highlight on the page
+  - `applyHighlights` messages containing text segments to highlight
   - `analysisComplete` notifications when text analysis is finished
-  - `mediaAnalysisComplete` notifications when media analysis is finished
-- **Modifies the webpage** by highlighting potentially misleading content directly in the DOM
+  - `displayMediaAnalysis` for image/video/audio analysis results
+- **Modifies the webpage** by highlighting misleading content and adding analysis overlays to media
 
 ### Background Script (background.js) Interactions
 
 - **Acts as the central communication hub** between all components
 - **Maintains state** for each analyzed tab using the `processingState` object, storing:
   - Text analysis results (`textResult`)
-  - Media analysis results (`mediaResult`)
+  - Media analysis results (`mediaItems`)
+  - Sentiment/bias analysis results (`sentimentBiasResult`)
 - **Handles requests from content.js**:
-  - Processes raw text through the text analysis API
-  - Processes media URLs through the media analysis API
+  - Processes text through text analysis API (port 5000)
+  - Processes text through sentiment/bias API (port 5002)
+  - Processes media URLs through media analysis API (port 3000)
   - Sends highlight instructions back to content script
 - **Communicates with popup.js and sidepanel.js**:
   - Responds to `getResultForTab` requests with analysis data
-  - Sends `analysisComplete` and `mediaAnalysisComplete` notifications
-- **Manages backend communication**:
-  - Sends requests to backend API endpoints
-  - Parses and normalizes API responses
-  - Handles errors and retries
-- **Provides a test mode** with sample responses for development and testing
+  - Sends analysis completion notifications
+- **Handles user authentication**:
+  - Manages Google OAuth tokens
+  - Verifies user access for premium features
 
 ### Popup UI (popup.js) Interactions
 
 - **Initializes** when the user clicks the extension icon
-- **Queries background.js** for current tab analysis results using `getResultForTab`
+- **Queries background.js** for current tab analysis results
 - **Updates UI** based on credibility assessment:
   - Shows a color-coded status indicator (red/green/gray)
-  - Displays a brief summary of the credibility evaluation
+  - Displays a summary with confidence level
+  - Shows sentiment and bias tags
 - **Opens sidepanel.js** when the user clicks the "View Details" button
 - **Synchronizes theme preferences** with sidepanel using `chrome.storage.local`
 - **Listens for changes** to analysis results via `chrome.runtime.onMessage`
@@ -308,69 +337,57 @@ The TruthScope extension relies on a carefully designed communication architectu
 ### Side Panel UI (sidepanel.js) Interactions
 
 - **Initializes** when opened from the popup or via Chrome's side panel feature
-- **Queries background.js** for detailed analysis results using `getResultForTab`
+- **Queries background.js** for detailed analysis results
 - **Renders comprehensive results**:
   - Credibility score and confidence level
-  - AI-generated reasoning about the content
+  - AI-generated reasoning about the content credibility
+  - Sentiment and bias analysis
   - Media analysis findings
   - Fact-check sources and related information
-- **Synchronizes theme preferences** using `chrome.storage.local`
-- **Listens for updates** from background script to refresh results in real-time
+- **Allows user-initiated analysis** of text snippets and media
 - **Provides theme customization** that affects all extension UI components
-
-### Data Flow Sequence Diagram
-
-```
-Webpage → content.js → background.js → Backend APIs
-                             ↓
-                        processingState
-                             ↓
-popup.js ← background.js → sidepanel.js
-                ↓                 
-            User Interface
-```
 
 ### Theme Management Across Components
 
-Both popup.js and sidepanel.js implement identical theme management logic:
+Both popup.js and sidepanel.js implement the same theme management logic:
 
 1. **Theme Storage**: Preferences stored in `chrome.storage.local` as 'light', 'dark', or 'system'
 2. **Theme Detection**: System theme detected via `window.matchMedia('(prefers-color-scheme: dark')`
 3. **Theme Synchronization**: Changes in one component reflect in the other through storage events
 4. **Theme Application**: HTML classes control the appearance of UI elements in both components
 
-This architecture ensures a seamless user experience with consistent theme application across all extension UI components.
-
 ## Communication Flow
 
-The extension follows a carefully designed data flow:
+The extension follows this data flow pattern:
 
 1. **Content → Background**:
    - Content script extracts article text and media
-   - Sends to background script using separate actions: `processText` and `processMedia`
+   - Sends text for analysis using `processText` action
+   - Sends media URLs for analysis when user initiates media analysis
 
-2. **Background → Backend**:
-   - Background script sends data to respective analysis endpoints
-   - Text to text analysis API, media to media analysis API
+2. **Background → Backend Services**:
+   - Background script sends text to text analysis service (port 5000)
+   - Background script sends text to sentiment/bias analysis service (port 5002)
+   - Background script sends media URLs to media analysis service (port 3000)
 
 3. **Background → Content**:
-   - Background script sends highlight instructions back to content script
-   - Content script applies highlights to potentially misleading text segments
+   - Background script sends highlight instructions to content script
+   - Background script sends media analysis results to content script for display
 
-4. **Background → UI Components**:
-   - Popup requests summary data from background script
-   - Side panel requests detailed analysis from background script
-   - Both components properly display results based on the credibility assessment
+4. **Background ↔ UI Components**:
+   - Popup and sidepanel request analysis results from background script
+   - Background notifies UI components when new analysis results are available
 
 5. **Theme Synchronization**:
-   - Both popup and side panel use `chrome.storage.local` to maintain theme consistency
+   - Popup and side panel use shared storage for theme preferences
    - Changes in either component are reflected in the other
 
 ## Prerequisites
 
-- Chrome browser
-- Python 3.7 or higher (for backend)
-- Backend API keys (see backend setup)
+- Chrome browser (version 88 or higher)
+- Python 3.8 or higher (for backend services)
+- PostgreSQL database (for user management)
+- API keys for third-party services (see backend setup)
 
 ## Installation
 
@@ -378,17 +395,17 @@ The extension follows a carefully designed data flow:
 
 ```bash
 git clone <repository-url>
-cd TruthScope
+cd SatyanwesAI
 ```
 
-### 2. Set Up the Backend
+### 2. Set Up the Backend Services
 
 1. Navigate to the backend directory:
 ```bash
 cd extension/backend
 ```
 
-2. Create and activate a virtual environment (optional but recommended):
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -399,25 +416,21 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file in the backend directory with your API keys:
-```
-GOOGLE_FACT_CHECK_API_KEY=your_api_key_here
-NEWS_API_KEY=your_news_api_key_here
-```
+4. Create `.env` files for each service with appropriate API keys (see Backend README)
 
-5. Start the backend server:
+5. Start the backend services (each in a separate terminal):
 ```bash
-python app.py
+python check_media.py  # Media analysis service (port 3000)
+python check_text.py   # Text analysis service (port 5000)
+python check_sentiment.py  # Sentiment/bias analysis (port 5002)
 ```
-
-The backend will run on `http://127.0.0.1:5000`
 
 ### 3. Load the Extension in Chrome
 
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable "Developer mode" in the top right corner
-3. Click "Load unpacked" and select the extension directory
-4. The extension icon should appear in your Chrome toolbar
+3. Click "Load unpacked" and select the `extension/frontend` directory
+4. The SatyanwesAI icon should appear in your Chrome toolbar
 
 ## Usage
 
@@ -429,16 +442,46 @@ The backend will run on `http://127.0.0.1:5000`
 2. **Detailed Analysis**:
    - Click the "View Details" button in the popup
    - The side panel will open with comprehensive analysis results
-   - Review fact-check sources and media analysis
+   - Review credibility assessment, sentiment/bias analysis, fact-check sources, and media analysis
 
 3. **Visual Indicators**:
    - Potentially misleading text segments are highlighted on the page
    - The popup shows a color-coded credibility indicator
-   - The side panel displays confidence scores and related information
+   - The side panel displays confidence scores and AI reasoning
 
-4. **Theme Customization**:
-   - Click the theme toggle button in the side panel
+4. **Media Analysis**:
+   - Images on the page can be analyzed for AI manipulation
+   - Results show manipulation confidence and extracted text
+   - Premium users can analyze video and audio content
+
+5. **Theme Customization**:
+   - Click the theme toggle button in either the popup or side panel
    - Choose between light, dark, or system theme
+
+## Development
+
+*   **Making Changes:** After modifying any frontend file (HTML, CSS, JS), you need to reload the extension in `chrome://extensions` by clicking the refresh icon.
+
+*   **Debugging:**
+    *   **Popup:** Right-click the extension icon and select "Inspect popup".
+    *   **Background Script:** Go to `chrome://extensions`, find SatyanwesAI, and click the "service worker" link.
+    *   **Content Script:** Open the developer tools (F12) on a webpage where the content script is active and check the Console tab (make sure the context is set to the page, not the extension).
+    *   **Side Panel:** Right-click within the panel and select "Inspect".
+
+*   **Backend URL:** If your backend services are running on different ports or hosts, update the endpoint URLs in `background.js`:
+    ```javascript
+    const TEXT_ANALYSIS_URL = "http://127.0.0.1:5000/analyze";
+    const IMAGE_ANALYSIS_URL = "http://127.0.0.1:3000/analyze_image";
+    // ...etc.
+    ```
+
+## Key Files
+
+*   `manifest.json`: Extension configuration and permissions
+*   `background.js`: Background service worker that coordinates communication
+*   `content.js`: Content script that extracts and modifies web page content
+*   `popup.html/js`: Extension popup UI and logic
+*   `sidepanel.html/js`: Detailed analysis panel UI and logic
 
 ## License
 
@@ -446,63 +489,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- BERT model for text classification
-- Media analysis techniques
-- Google Fact Check API
-- Chrome Extension APIs
-
-# TruthScope Extension - Frontend
-
-This directory contains the frontend code for the TruthScope Chrome Extension. It provides the user interface (popup, side panel) for interacting with the media analysis features.
-
-## Features
-
-*   **Popup Interface (`popup.html`, `popup.js`):**
-    *   Displays the main extension interface when the icon is clicked.
-    *   Allows users to sign in with Google (though authentication logic primarily resides in the backend).
-    *   Shows user status (e.g., signed in, tier).
-    *   Provides buttons/controls to trigger media analysis.
-*   **Content Script (`content.js`):**
-    *   Runs in the context of web pages visited by the user.
-    *   Detects media elements (images, potentially video/audio in the future) on the page.
-    *   Adds context menu items or overlays to trigger analysis for specific media.
-    *   Communicates with the background script.
-*   **Background Script (`background.js`):**
-    *   Acts as the central controller for the extension.
-    *   Listens for messages from the popup and content scripts.
-    *   Manages communication with the backend Flask server.
-    *   Handles user authentication state (storing tokens/IDs securely).
-    *   Makes API calls to the backend endpoints (`/analyze_image`, `/analyze_video`, `/analyze_audio`).
-*   **Side Panel (`sidepanel.html`, `sidepanel.js`):**
-    *   Provides a persistent panel (if configured in `manifest.json`) to display detailed analysis results or history.
-*   **Manifest (`manifest.json`):**
-    *   Defines the extension's properties, permissions, scripts, and UI components.
-    *   Specifies necessary permissions (e.g., `storage`, `activeTab`, `contextMenus`, access to backend URL).
-
-## Setup & Loading the Extension
-
-1.  **Backend Running:** Ensure the backend server (`extension/backend/check_media.py`) is running and accessible (e.g., at `http://localhost:3000`). The frontend needs to communicate with it.
-2.  **Open Chrome Extensions:** Navigate to `chrome://extensions` in your Chrome browser.
-3.  **Enable Developer Mode:** Toggle the "Developer mode" switch in the top-right corner.
-4.  **Load Unpacked:**
-    *   Click the "Load unpacked" button.
-    *   Navigate to and select the `extension/frontend` directory within your project.
-5.  **Pin the Extension:** Find the TruthScope extension in your toolbar (you might need to click the puzzle piece icon) and pin it for easy access.
-
-## Development
-
-*   **Making Changes:** After modifying any frontend file (HTML, CSS, JS), you need to reload the extension in `chrome://extensions` by clicking the refresh icon for the TruthScope extension.
-*   **Debugging:**
-    *   **Popup:** Right-click the extension icon and select "Inspect popup".
-    *   **Background Script:** Go to `chrome://extensions`, find TruthScope, and click the "service worker" link.
-    *   **Content Script:** Open the developer tools (F12) on a webpage where the content script is active and check the Console tab (make sure the context is set to the page, not the extension).
-    *   **Side Panel:** If using the side panel, right-click within the panel and select "Inspect".
-*   **Backend URL:** Ensure the `fetch` calls in `background.js` (or wherever API calls are made) point to the correct URL where your backend server is running.
-
-## Key Files
-
-*   `manifest.json`: Core configuration file.
-*   `popup.html`/`popup.js`: UI and logic for the browser action popup.
-*   `content.js`: Interacts with web page content.
-*   `background.js`: Event handling and backend communication.
-*   `sidepanel.html`/`sidepanel.js`: UI and logic for the side panel (if enabled).
+- BERT and other machine learning models for text classification
+- Sightengine API for media analysis
+- Google Fact Check API for fact-checking
+- Chrome Extension APIs for browser integration

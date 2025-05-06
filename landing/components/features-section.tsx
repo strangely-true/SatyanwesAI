@@ -138,7 +138,7 @@ export function FeaturesSection() {
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">
             How{" "}
             <span className="bg-gradient-to-r from-primary p-0.5 to-purple-600 bg-clip-text text-transparent animate-gradient">
-              TruthScope
+              SatyanwesAI
             </span>{" "}
             Protects You
           </h2>

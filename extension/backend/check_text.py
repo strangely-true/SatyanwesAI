@@ -831,7 +831,7 @@ def index():
     client_status = "Initialized" if client else "Not Initialized (Check Logs)"
     db_status = "Pool Available" if db_pool else "Pool Not Available (Check Logs)"
     return jsonify({
-        "message": "TruthScope Analysis Backend",
+        "message": "SatyanwesAI Analysis Backend",
         "client_status": client_status,
         "database_status": db_status
     })

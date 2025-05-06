@@ -120,7 +120,7 @@ export function PricingSection() {
             Level
           </h2>
           <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
-            Flexible plans designed to meet your needs. All plans include core TruthScope features.
+            Flexible plans designed to meet your needs. All plans include core SatyanwesAI features.
           </p>
 
           <div className="flex items-center justify-center mt-8 mb-12">

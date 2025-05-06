@@ -143,7 +143,7 @@ function applyHighlights(highlights) {
   // Apply modifications
   nodesToModify.forEach(({ node, textToHighlight }) => {
       // Check if already highlighted or part of a highlight to prevent nested highlights
-      if (node.parentElement.classList.contains('truthscope-highlight')) {
+      if (node.parentElement.classList.contains('SatyanwesAI-highlight')) {
           return;
       }
 
@@ -168,7 +168,7 @@ function applyHighlights(highlights) {
 
           // Create the highlight span
           const span = document.createElement('span');
-          span.className = 'truthscope-highlight'; // Add a class for potential removal/styling
+          span.className = 'SatyanwesAI-highlight'; // Add a class for potential removal/styling
           span.style.cssText = highlightStyle;
           span.textContent = matchText;
           parent.insertBefore(span, currentNode);
@@ -214,11 +214,11 @@ function injectStyles() {
     const style = document.createElement('style');
     // Use backticks directly for template literal
     style.textContent = `
-        .truthscope-media-container {
+        .SatyanwesAI-media-container {
             position: relative;
             display: inline-block; /* Adjust as needed */
         }
-        .truthscope-analyze-button {
+        .SatyanwesAI-analyze-button {
             position: absolute;
             top: 5px;
             right: 5px;
@@ -233,10 +233,10 @@ function injectStyles() {
             opacity: 0.7;
             transition: opacity 0.2s;
         }
-        .truthscope-analyze-button:hover {
+        .SatyanwesAI-analyze-button:hover {
             opacity: 1;
         }
-        .truthscope-analysis-result {
+        .SatyanwesAI-analysis-result {
             position: absolute;
             bottom: 5px; /* Position relative to container */
             left: 5px;
@@ -251,7 +251,7 @@ function injectStyles() {
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         /* --- Compact Result Overlay for Small Media --- */
-        .truthscope-result-compact {
+        .SatyanwesAI-result-compact {
             position: absolute;
             top: 0;
             left: 0;
@@ -264,26 +264,26 @@ function injectStyles() {
             box-sizing: border-box;
             border: 2px solid transparent; /* Base border */
         }
-        .truthscope-result-compact.is-authentic {
+        .SatyanwesAI-result-compact.is-authentic {
             background-color: rgba(0, 255, 0, 0.3); /* Green tint */
             border-color: rgba(0, 128, 0, 0.7);
         }
-        .truthscope-result-compact.is-manipulated {
+        .SatyanwesAI-result-compact.is-manipulated {
             background-color: rgba(255, 0, 0, 0.3); /* Red tint */
             border-color: rgba(139, 0, 0, 0.7);
         }
-        .truthscope-result-compact.is-error {
+        .SatyanwesAI-result-compact.is-error {
             background-color: rgba(255, 165, 0, 0.3); /* Orange tint */
             border-color: rgba(204, 132, 0, 0.7);
         }
-        .truthscope-result-compact.is-unknown {
+        .SatyanwesAI-result-compact.is-unknown {
             background-color: rgba(128, 128, 128, 0.3); /* Gray tint */
             border-color: rgba(80, 80, 80, 0.7);
         }
         /* --- End Compact Result Overlay --- */
 
         /* --- Updated Style for False Warning Header --- */
-        .truthscope-false-warning-header {
+        .SatyanwesAI-false-warning-header {
             position: fixed; /* Or sticky */
             top: 0;
             left: 0;
@@ -303,25 +303,25 @@ function injectStyles() {
             align-items: center; /* Center items vertically */
             box-sizing: border-box; /* Include padding in width calculation */
         }
-        .truthscope-header-content {
+        .SatyanwesAI-header-content {
             flex-grow: 1; /* Allow content to take up space */
             text-align: center; /* Center the text */
             margin: 0 10px; /* Add some margin */
         }
-        /* Style for the TruthScope brand text */
-        .truthscope-brand-text {
+        /* Style for the SatyanwesAI brand text */
+        .SatyanwesAI-brand-text {
             color: #e6e6fa; /* Lavender color */
             margin-right: 8px; /* Space between brand and message */
             font-weight: bold;
         }
         /* Style for action buttons container */
-        .truthscope-header-actions {
+        .SatyanwesAI-header-actions {
             display: flex;
             align-items: center;
             gap: 10px; /* Space between buttons */
         }
         /* Style for generic header buttons */
-        .truthscope-header-btn {
+        .SatyanwesAI-header-btn {
             background: none;
             border: none;
             color: white;
@@ -331,15 +331,15 @@ function injectStyles() {
             padding: 0 5px;
             line-height: 1;
         }
-        .truthscope-header-btn:hover {
+        .SatyanwesAI-header-btn:hover {
             color: #eee;
         }
         /* Specific style for close button */
-        .truthscope-header-close-btn {
+        .SatyanwesAI-header-close-btn {
              font-size: 22px; /* Make 'X' slightly larger */
         }
         /* Specific style for side panel button (using a simple icon/text) */
-        .truthscope-header-sidepanel-btn {
+        .SatyanwesAI-header-sidepanel-btn {
              /* Add specific styles if needed, e.g., icon */
         }
         /* --- End Updated Style --- */
@@ -350,22 +350,22 @@ function injectStyles() {
 // Function to add the false warning header
 function addFalseWarningHeader(message) {
     // Check if header already exists
-    if (document.getElementById('truthscope-false-header')) {
+    if (document.getElementById('SatyanwesAI-false-header')) {
         return;
     }
 
     const headerDiv = document.createElement('div');
-    headerDiv.id = 'truthscope-false-header';
-    headerDiv.className = 'truthscope-false-warning-header';
+    headerDiv.id = 'SatyanwesAI-false-header';
+    headerDiv.className = 'SatyanwesAI-false-warning-header';
 
     // Container for the main text content
     const contentDiv = document.createElement('div');
-    contentDiv.className = 'truthscope-header-content';
+    contentDiv.className = 'SatyanwesAI-header-content';
 
-    // Create span for TruthScope brand
+    // Create span for SatyanwesAI brand
     const brandSpan = document.createElement('span');
-    brandSpan.className = 'truthscope-brand-text';
-    brandSpan.textContent = 'TruthScope:';
+    brandSpan.className = 'SatyanwesAI-brand-text';
+    brandSpan.textContent = 'SatyanwesAI:';
 
     // Create span for the main message
     const messageSpan = document.createElement('span');
@@ -377,13 +377,13 @@ function addFalseWarningHeader(message) {
 
     // Container for action buttons
     const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'truthscope-header-actions';
+    actionsDiv.className = 'SatyanwesAI-header-actions';
 
     // --- Side Panel Button (Conditional) ---
     // Check if the Side Panel API is available before creating the button
     if (chrome.sidePanel && chrome.sidePanel.open) {
         const sidePanelButton = document.createElement('button');
-        sidePanelButton.className = 'truthscope-header-btn truthscope-header-sidepanel-btn';
+        sidePanelButton.className = 'SatyanwesAI-header-btn SatyanwesAI-header-sidepanel-btn';
         sidePanelButton.innerHTML = '📊'; // Simple chart emoji as icon
         sidePanelButton.setAttribute('aria-label', 'Open analysis details');
         sidePanelButton.title = 'Open analysis details'; // Tooltip
@@ -421,7 +421,7 @@ function addFalseWarningHeader(message) {
 
     // Create close button
     const closeButton = document.createElement('button');
-    closeButton.className = 'truthscope-header-btn truthscope-header-close-btn';
+    closeButton.className = 'SatyanwesAI-header-btn SatyanwesAI-header-close-btn';
     closeButton.innerHTML = '&times;'; // Use HTML entity for 'X'
     closeButton.setAttribute('aria-label', 'Close warning');
     closeButton.title = 'Close warning'; // Tooltip
@@ -481,7 +481,7 @@ function injectAnalysisButton(mediaElement) {
         if (mediaElement.offsetWidth === 0 && mediaElement.offsetHeight === 0) {
             mediaElement.onload = () => {
                 if (mediaElement.naturalWidth > 50 && mediaElement.naturalHeight > 50) {
-                    if (!mediaElement.dataset.truthscopeId) {
+                    if (!mediaElement.dataset.SatyanwesAIId) {
                          injectAnalysisButton(mediaElement);
                     }
                 }
@@ -499,16 +499,16 @@ function injectAnalysisButton(mediaElement) {
     // --- End Filtering ---
 
     // Check if button already exists for this element
-    if (mediaElement.dataset.truthscopeId && mediaDataMap[mediaElement.dataset.truthscopeId]) {
+    if (mediaElement.dataset.SatyanwesAIId && mediaDataMap[mediaElement.dataset.SatyanwesAIId]) {
         return; // Already processed
     }
 
-    const mediaId = `truthscope-media-${mediaCounter++}`;
-    mediaElement.dataset.truthscopeId = mediaId;
+    const mediaId = `SatyanwesAI-media-${mediaCounter++}`;
+    mediaElement.dataset.SatyanwesAIId = mediaId;
 
     const button = document.createElement('button');
     button.textContent = 'Analyze';
-    button.classList.add('truthscope-analyze-button');
+    button.classList.add('SatyanwesAI-analyze-button');
     button.dataset.mediaId = mediaId; // Link button to media element
 
     button.addEventListener('click', async (event) => {
@@ -545,7 +545,7 @@ function displayAnalysisResult(mediaId, analysisData) {
     if (!mediaData || !mediaData.button || !mediaData.element) {
         console.error(`Button or media element not found for mediaId: ${mediaId}`);
         // Attempt to find button by dataset just in case map failed
-        const fallbackButton = document.querySelector(`.truthscope-analyze-button[data-media-id="${mediaId}"]`);
+        const fallbackButton = document.querySelector(`.SatyanwesAI-analyze-button[data-media-id="${mediaId}"]`);
         if (fallbackButton) {
             fallbackButton.textContent = 'Error';
             fallbackButton.disabled = false;
@@ -565,7 +565,7 @@ function displayAnalysisResult(mediaId, analysisData) {
     }
 
     // Remove existing result if any
-    const existingResult = container.querySelector(`.truthscope-analysis-result[data-media-id="${mediaId}"], .truthscope-result-compact[data-media-id="${mediaId}"]`);
+    const existingResult = container.querySelector(`.SatyanwesAI-analysis-result[data-media-id="${mediaId}"], .SatyanwesAI-result-compact[data-media-id="${mediaId}"]`);
     if (existingResult) {
         existingResult.remove();
     }
@@ -612,11 +612,11 @@ function displayAnalysisResult(mediaId, analysisData) {
     }
 
     if (useCompactView) {
-        resultDiv.classList.add('truthscope-result-compact', resultStatusClass);
+        resultDiv.classList.add('SatyanwesAI-result-compact', resultStatusClass);
         // No text content for compact view
     } else {
         // --- Standard Text Result Logic ---
-        resultDiv.classList.add('truthscope-analysis-result');
+        resultDiv.classList.add('SatyanwesAI-analysis-result');
         let resultText = "Analysis Result:";
 
         if (analysisData.status === 'error' && analysisData.error) {
@@ -665,11 +665,11 @@ function displayAnalysisResult(mediaId, analysisData) {
 // Function to find and add buttons to media elements
 function addAnalysisButtonsToMedia() {
     const mediaElements = document.querySelectorAll(
-        'img:not(.truthscope-ui-element):not([data-truthscope-id]), ' +
-        'video:not(.truthscope-ui-element):not([data-truthscope-id]), ' +
-        'audio:not(.truthscope-ui-element):not([data-truthscope-id]), ' +
-        'iframe[src*="youtube.com/embed/"]:not(.truthscope-ui-element):not([data-truthscope-id]), ' +
-        'iframe[src*="youtube-nocookie.com/embed/"]:not(.truthscope-ui-element):not([data-truthscope-id])'
+        'img:not(.SatyanwesAI-ui-element):not([data-SatyanwesAI-id]), ' +
+        'video:not(.SatyanwesAI-ui-element):not([data-SatyanwesAI-id]), ' +
+        'audio:not(.SatyanwesAI-ui-element):not([data-SatyanwesAI-id]), ' +
+        'iframe[src*="youtube.com/embed/"]:not(.SatyanwesAI-ui-element):not([data-SatyanwesAI-id]), ' +
+        'iframe[src*="youtube-nocookie.com/embed/"]:not(.SatyanwesAI-ui-element):not([data-SatyanwesAI-id])'
     );
     mediaElements.forEach(el => {
         injectAnalysisButton(el);
@@ -708,9 +708,9 @@ async function init() {
                                 const tagName = node.tagName;
                                 let isRelevantMedia = false;
 
-                                if (['IMG', 'VIDEO', 'AUDIO'].includes(tagName) && !node.dataset.truthscopeId) {
+                                if (['IMG', 'VIDEO', 'AUDIO'].includes(tagName) && !node.dataset.SatyanwesAIId) {
                                     isRelevantMedia = true;
-                                } else if (tagName === 'IFRAME' && node.src && (node.src.includes('youtube.com/embed/') || node.src.includes('youtube-nocookie.com/embed/')) && !node.dataset.truthscopeId) {
+                                } else if (tagName === 'IFRAME' && node.src && (node.src.includes('youtube.com/embed/') || node.src.includes('youtube-nocookie.com/embed/')) && !node.dataset.SatyanwesAIId) {
                                     isRelevantMedia = true;
                                 }
 
@@ -720,11 +720,11 @@ async function init() {
 
                                 if (node.hasChildNodes()) {
                                     node.querySelectorAll(
-                                        'img:not([data-truthscope-id]), ' +
-                                        'video:not([data-truthscope-id]), ' +
-                                        'audio:not([data-truthscope-id]), ' +
-                                        'iframe[src*="youtube.com/embed/"]:not([data-truthscope-id]), ' +
-                                        'iframe[src*="youtube-nocookie.com/embed/"]:not([data-truthscope-id])'
+                                        'img:not([data-SatyanwesAI-id]), ' +
+                                        'video:not([data-SatyanwesAI-id]), ' +
+                                        'audio:not([data-SatyanwesAI-id]), ' +
+                                        'iframe[src*="youtube.com/embed/"]:not([data-SatyanwesAI-id]), ' +
+                                        'iframe[src*="youtube-nocookie.com/embed/"]:not([data-SatyanwesAI-id])'
                                     ).forEach(el => {
                                         injectAnalysisButton(el);
                                     });

@@ -43,7 +43,7 @@ export function WorkflowSection() {
   const workflowSteps = [
     {
       title: "Install Extension",
-      description: "Add TruthScope to your Chrome browser with just one click.",
+      description: "Add SatyanwesAI to your Chrome browser with just one click.",
       color: "from-blue-500 to-blue-600",
     },
     {
@@ -53,7 +53,7 @@ export function WorkflowSection() {
     },
     {
       title: "Receive Alerts",
-      description: "Get notified when TruthScope detects potentially misleading content.",
+      description: "Get notified when SatyanwesAI detects potentially misleading content.",
       color: "from-amber-500 to-amber-600",
     },
     {
@@ -63,7 +63,7 @@ export function WorkflowSection() {
     },
     {
       title: "Make Informed Decisions",
-      description: "Use TruthScope's insights to determine what content to trust.",
+      description: "Use SatyanwesAI's insights to determine what content to trust.",
       color: "from-red-500 to-red-600",
     },
   ]
@@ -83,7 +83,7 @@ export function WorkflowSection() {
           <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tighter mb-4">
             Your Journey with{" "}
             <span className="p-0.5 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent animate-gradient">
-              TruthScope
+              SatyanwesAI
             </span>
           </h2>
           <p className="text-base md:text-xl text-foreground/70 max-w-2xl mx-auto px-4">

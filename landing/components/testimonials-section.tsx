@@ -96,7 +96,7 @@ export function TestimonialsSection() {
       name: "Ananya Sharma",
       role: "Digital Marketer",
       content:
-        "With so much fake news on social media, TruthScope helps me stay informed with accurate information.",
+        "With so much fake news on social media, SatyanwesAI helps me stay informed with accurate information.",
       avatar: "./Journalist.jpg?height=80&width=80",
       rating: 5,
       publication: "The Daily Chronicle",
@@ -105,7 +105,7 @@ export function TestimonialsSection() {
       name: "Dr. Ramesh Verma",
       role: "College Professor",
       content:
-        "As a retired professor, I’ve seen how misinformation can mislead people. TruthScope is an excellent tool for verifying facts before believing them",
+        "As a retired professor, I’ve seen how misinformation can mislead people. SatyanwesAI is an excellent tool for verifying facts before believing them",
       avatar: "./Professor.jpeg?height=80&width=80",
       rating: 5,
       publication: "Academy of Technology",
@@ -114,7 +114,7 @@ export function TestimonialsSection() {
       name: "Arjun Mehta",
       role: "Social Media Manager",
       content:
-        "In the age of viral content, misinformation spreads fast. As a social media manager, TruthScope helps me verify news before sharing, ensuring credibility.",
+        "In the age of viral content, misinformation spreads fast. As a social media manager, SatyanwesAI helps me verify news before sharing, ensuring credibility.",
       avatar: "./office job.jpg?height=80&width=80",
       rating: 5,
       publication: "TechConnect",
@@ -123,7 +123,7 @@ export function TestimonialsSection() {
       name: "Aditya Kapoor",
       role: "College Student",
       content:
-        "As a student, I come across a lot of fake news online. TruthScope makes it easy to fact-check information and avoid spreading false content.",
+        "As a student, I come across a lot of fake news online. SatyanwesAI makes it easy to fact-check information and avoid spreading false content.",
       avatar: "./a normal boy.jpg?height=80&width=80",
       rating: 4,
       publication: "Future Institute of Engineering",
@@ -132,7 +132,7 @@ export function TestimonialsSection() {
       name: "Dr. Kavita Rao",
       role: "Biologist",
       content:
-        "As a biologist, I often see misinformation about health and science spreading online. TruthScope is a great tool to fact-check claims and ensure people get accurate information",
+        "As a biologist, I often see misinformation about health and science spreading online. SatyanwesAI is a great tool to fact-check claims and ensure people get accurate information",
       avatar: "./biologist.jpg?height=80&width=80",
       rating: 5,
       publication: "Biocon",
@@ -141,7 +141,7 @@ export function TestimonialsSection() {
       name: "Mrs. Meenal Joshi",
       role: "High School Teacher",
       content:
-        "As a teacher, I recommend TruthScope to my students to develop critical thinking and media literacy.",
+        "As a teacher, I recommend SatyanwesAI to my students to develop critical thinking and media literacy.",
       avatar: "./Teacher.jpeg?height=80&width=80",
       rating: 5,
       publication: "Julien Day High School",
@@ -163,11 +163,11 @@ export function TestimonialsSection() {
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">
             What Our Users Say About{" "}
             <span className="p-0.5 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent animate-gradient">
-              TruthScope
+              SatyanwesAI
             </span>
           </h2>
           <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
-            Hear from our users who rely on TruthScope to navigate the complex information landscape.
+            Hear from our users who rely on SatyanwesAI to navigate the complex information landscape.
           </p>
         </div>
 

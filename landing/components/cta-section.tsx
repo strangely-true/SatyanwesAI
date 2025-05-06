@@ -61,10 +61,10 @@ export function CtaSection() {
               Start Browsing with Confidence Today
             </h2>
             <p className="text-xl text-white/80 max-w-2xl mx-auto mb-8">
-              Join thousands of users who trust TruthScope to help them navigate the complex information landscape.
+              Join thousands of users who trust SatyanwesAI to help them navigate the complex information landscape.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="https://github.com/sujayx07/TruthScope" target="_blank">
+              <a href="https://github.com/sujayx07/SatyanwesAI" target="_blank">
               <Button
                 size="lg"
                 variant="secondary"

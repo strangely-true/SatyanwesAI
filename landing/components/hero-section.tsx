@@ -66,7 +66,7 @@ export function HeroSection() {
             </Badge>
             <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
               <span className="p-0.5 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent animate-gradient">
-                TruthScope
+                SatyanwesAI
               </span>
             </h1>
             <p className="text-xl text-foreground/80 h-6 pb-4">
@@ -78,7 +78,7 @@ export function HeroSection() {
               identify misinformation with confidence.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-            <a href="https://github.com/sujayx07/TruthScope" target="_blank">
+            <a href="https://github.com/sujayx07/SatyanwesAI" target="_blank">
               <Button
                 size="lg"
                 className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300 shadow-lg hover:shadow-primary/20"
@@ -110,7 +110,7 @@ export function HeroSection() {
                 ))}
               </div>
               <div>
-                <span className="font-medium">10+</span> users trust TruthScope
+                <span className="font-medium">10+</span> users trust SatyanwesAI
               </div>
             </div>
           </div>
@@ -133,8 +133,8 @@ export function HeroSection() {
               </div>
               <div className="relative">
                 <Image
-                  src="/placeholder.svg?height=300&width=400&text=TruthScope+Extension+Demo"
-                  alt="TruthScope Extension"
+                  src="/placeholder.svg?height=300&width=400&text=SatyanwesAI+Extension+Demo"
+                  alt="SatyanwesAI Extension"
                   width={400}
                   height={300}
                   className="w-full h-auto"

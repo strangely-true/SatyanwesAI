@@ -607,7 +607,7 @@ def index():
         logging.warning(f"Health check DB connection failed: {e}")
 
     return jsonify({
-        "message": "TruthScope Media Analysis Backend",
+        "message": "SatyanwesAI Media Analysis Backend",
         "status": "running",
         "database_pool_status": db_pool_status,
         "database_connection_status": db_status

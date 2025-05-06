@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "TruthScope",
+  "name": "SatyanwesAI",
   "version": "1.1",
   "description": "Analyzes web content for potential misinformation using AI.",
   "permissions": [

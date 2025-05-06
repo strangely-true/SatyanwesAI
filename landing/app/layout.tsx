@@ -3,10 +3,10 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TruthScope",
+  title: "SatyanwesAI",
   description:
     "AI-powered browser extension analyzes news articles and social media posts in real-time",
-  generator: "TruthScope",
+  generator: "SatyanwesAI",
 };
 
 export default function RootLayout({

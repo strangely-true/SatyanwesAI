@@ -54,10 +54,10 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <img src="./TruthScope_Logo.png" alt="" width={50} height={50} />
+            <img src="./SatyanwesAI_Logo.png" alt="" width={50} height={50} />
           </div>
           <span className="p-0.5 text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            TruthScope
+            SatyanwesAI
           </span>
         </div>
 
@@ -99,7 +99,7 @@ export function Navbar() {
           <SignedIn>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
-          <a href="https://github.com/sujayx07/TruthScope" target="_blank">
+          <a href="https://github.com/sujayx07/SatyanwesAI" target="_blank">
           <Button className="relative overflow-hidden group bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300">
             <span className="relative z-10 flex items-center">
               Add to Chrome
@@ -151,7 +151,7 @@ export function Navbar() {
             <SignedIn>
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
-            <a href="https://github.com/sujayx07/TruthScope" target="_blank">
+            <a href="https://github.com/sujayx07/SatyanwesAI" target="_blank">
             <Button className="w-full justify-center mt-2 bg-gradient-to-r from-primary to-purple-600">
               Add to Chrome
               <ArrowRight className="ml-2 h-4 w-4" />

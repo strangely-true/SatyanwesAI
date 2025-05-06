@@ -8,9 +8,9 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-2 mb-4">
-            <img src="./TruthScope_Logo.png" alt="" width={35} height={35} />
+            <img src="./SatyanwesAI_Logo.png" alt="" width={35} height={35} />
               <span className="text-lg font-bold bg-gradient-to-r from-primary p-0.5 to-purple-600 bg-clip-text text-transparent">
-                TruthScope
+                SatyanwesAI
               </span>
             </div>
             <p className="text-foreground/70 mb-4">
@@ -140,7 +140,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-foreground/60">© {new Date().getFullYear()} TruthScope. All rights reserved.</p>
+            <p className="text-sm text-foreground/60">© {new Date().getFullYear()} SatyanwesAI. All rights reserved.</p>
             <div className="flex gap-8">
               <Link href="#" className="text-sm text-foreground/60 hover:text-primary transition-colors">
                 Privacy Policy
