@@ -342,8 +342,53 @@ def call_sightengine_api(image_url: str) -> Dict[str, Any]:
         return {"status": "error", "error": f"Unexpected error during Sightengine API call: {e}"}
 
 def call_ocr_space_api(image_url: str) -> Dict[str, Any]:
-    logging.warning("call_ocr_space_api is deprecated and should not be called.")
-    return {"status": "error", "error": "OCR functionality is disabled."}
+    """Calls the OCR.space API to extract text from an image."""
+    logging.debug(f"Calling OCR.space API for image URL: {image_url}")
+    if not OCR_SPACE_API_KEY:
+        logging.error("OCR.space API key is not configured.")
+        return {"status": "error", "error": "OCR.space API key missing."}
+
+    # OCR operations typically need more time than other API calls
+    OCR_TIMEOUT_SECONDS = 30  # Increased timeout specifically for OCR operations
+
+    params = {
+        'apikey': OCR_SPACE_API_KEY,
+        'url': image_url,
+        'language': 'eng',
+        'isOverlayRequired': 'false',
+        'detectOrientation': 'true',
+        'scale': 'true',
+        'OCREngine': '2'  # Using the more accurate OCR engine
+    }
+    try:
+        response = requests.get(OCR_SPACE_API_URL, params=params, timeout=OCR_TIMEOUT_SECONDS)
+        response.raise_for_status()
+        result = response.json()
+        logging.debug(f"OCR.space API raw response: {result}")
+        
+        if not result.get('ParsedResults'):
+            error_detail = result.get('ErrorMessage', 'No parsed results returned from OCR.space API')
+            logging.warning(f"OCR.space API call failed: {error_detail}")
+            return {"status": "error", "error": error_detail, "parsed_text": None}
+            
+        parsed_text = result.get('ParsedResults', [{}])[0].get('ParsedText', '').strip()
+        return {"status": "success", "parsed_text": parsed_text}
+        
+    except requests.exceptions.Timeout:
+        logging.error(f"Timeout calling OCR.space API for {image_url}")
+        return {"status": "error", "error": "Timeout calling OCR.space API.", "parsed_text": None}
+    except requests.exceptions.HTTPError as e:
+        logging.error(f"HTTP error calling OCR.space API for {image_url}: {e.response.status_code} - {e.response.text}")
+        return {"status": "error", "error": f"OCR.space API returned HTTP error: {e.response.status_code}", "parsed_text": None}
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Network error calling OCR.space API for {image_url}: {e}")
+        return {"status": "error", "error": f"Network error calling OCR.space API: {e}", "parsed_text": None}
+    except json.JSONDecodeError as e:
+        logging.error(f"Failed to decode OCR.space API response for {image_url}: {e}")
+        return {"status": "error", "error": "Invalid JSON response from OCR.space API.", "parsed_text": None}
+    except Exception as e:
+        logging.error(f"Unexpected error calling OCR.space API for {image_url}: {e}", exc_info=True)
+        return {"status": "error", "error": f"Unexpected error during OCR.space API call: {e}", "parsed_text": None}
 
 def call_sightengine_video_api(video_url: str) -> Dict[str, Any]:
     pass
@@ -353,16 +398,20 @@ def call_ai_audio_api(audio_url: str) -> Dict[str, Any]:
 
 # --- Analysis Logic ---
 def analyze_image_logic(image_url: str) -> Dict[str, Any]:
-    """Analyzes an image using Sightengine, returning a structured result compatible with the frontend."""
+    """Analyzes an image using Sightengine and OCR.space, returning a structured result compatible with the frontend."""
     logging.info(f"Starting image analysis for: {image_url}")
 
     sightengine_result = call_sightengine_api(image_url)
-
+    ocr_result = call_ocr_space_api(image_url)
+    
     ai_generated_prob = 0.0
     manipulation_confidence = 0.0
     manipulation_error = None
     final_status = "error"
+    parsed_text = None
+    ocr_error = None
 
+    # Process Sightengine result
     if sightengine_result.get("status") == "success":
         final_status = "success"
         ai_generated_prob = sightengine_result.get("type", {}).get("ai_generated", 0.0)
@@ -371,15 +420,36 @@ def analyze_image_logic(image_url: str) -> Dict[str, Any]:
     else:
         manipulation_error = sightengine_result.get("error", "Unknown Sightengine error")
         logging.warning(f"Sightengine analysis failed for {image_url}: {manipulation_error}")
+    
+    # Process OCR result
+    if ocr_result.get("status") == "success":
+        parsed_text = ocr_result.get("parsed_text", "")
+        logging.debug(f"OCR successful for {image_url}. Text length: {len(parsed_text) if parsed_text else 0}")
+    else:
+        ocr_error = ocr_result.get("error", "Unknown OCR error")
+        logging.warning(f"OCR failed for {image_url}: {ocr_error}")
 
+    # Determine if the image is likely manipulated
     manipulated_found = 1 if ai_generated_prob >= 0.5 else 0
 
+    # Create analysis summary
     analysis_summary = ""
     if final_status == "success":
         detection_text = f"Detected as {'AI Generated' if manipulated_found else 'Likely Authentic'} (Confidence: {manipulation_confidence:.2f})."
-        analysis_summary = detection_text + " No text extracted (OCR disabled)."
+        text_status = ""
+        if parsed_text:
+            text_preview = parsed_text[:50] + "..." if len(parsed_text) > 50 else parsed_text
+            text_status = f" Text extracted: \"{text_preview}\""
+        elif ocr_error:
+            text_status = f" OCR Error: {ocr_error}"
+        else:
+            text_status = " No text detected in image."
+        
+        analysis_summary = detection_text + text_status
     else:
         analysis_summary = f"Analysis failed. Sightengine Error: {manipulation_error}"
+        if ocr_error:
+            analysis_summary += f" OCR Error: {ocr_error}"
         manipulated_found = 0
         manipulation_confidence = 0.0
 
@@ -392,9 +462,9 @@ def analyze_image_logic(image_url: str) -> Dict[str, Any]:
             {
                 "url": image_url,
                 "type": "image",
-                "parsed_text": None,
+                "parsed_text": parsed_text,
                 "ai_generated": ai_generated_prob if final_status == "success" else None,
-                "ocr_error": None,
+                "ocr_error": ocr_error,
                 "manipulation_error": manipulation_error
             }
         ],
